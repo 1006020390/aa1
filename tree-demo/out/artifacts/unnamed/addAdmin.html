@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="layui/css/layui.css"  media="all">
+</head>
+<body>
+<div class="layui-form-item">
+    <fieldset class="layui-elem-field layui-field-title" style ="margin-top:50px;">
+        <legend>用户列表</legend>
+    </fieldset>
+</div>
+
+
+<table border="solid">
+    <thead>
+    <tr><th>用户ID</th><th>用户名</th><th>角色</th><th>权限等级</th><th>注册时间</th></tr>
+    </thead>
+    <tbody>
+    </tbody>
+    <tfoot>
+    <tr><td colspan="2"></td></tr>
+    </tfoot>
+</table>
+<input id = "toId" value="" type="hidden">
+<div id="sss">
+
+</div>
+<script src="layui/layui.js"></script>
+<script src="layui/jquery.min.js" type="text/javascript"></script>
+<script>
+    $(function () {
+       goPage(1);
+    });
+function goPage(currentPage) {
+    if(currentPage<1){
+        currentPage=1;
+    }
+    $.post("layui/test02",
+        {"currentPage":currentPage,"pageSize":5},
+        function (data) {
+        console.log(data);
+            var page =  " <span  onclick='goPage(1)'>首页</span>"
+                +"<span  onclick='goPage("+data.prePage+")'>上一页</span> "
+                +"当前页"+data.pageNum
+                +"<span onclick='goPage("+data.nextPage+")' >下一页</span>"
+                + "<span onclick='goPage("+data.pages+")'>尾页</span>"
+                +"<input type='text' id='toPage'><span onclick='toPage()'>跳转</span> "
+                +"总页数"+data.pages;
+            var tr = data.lastPage;
+console.log(data.list)
+            $("#toId").attr("value",data.pages);
+            $("table tbody").html('');
+            $("table tfoot td").html('');
+            $("table tfoot td").append(page);
+            $.each(data.list,function(index,type){
+                var tr ="<tr><th>"+type.id+"</th><th>"+type.username
+                    +"</th><th>"+type.role_name+"</th><th>"+type.authority_level+"</th><th>"+timestampToTime(type.createTime)+"</th>" +
+                    "<th><input type='button' onclick='addManagement("+type.id+","+type.authority_level+")' value='添加权限'></th>" +
+                        "<th><input type='button' onclick='checkManagements("+type.id+",\""+type.role_name+"\",\""+type.username+"\")' value='查看权限'></th>"+
+                    "<th><input type='button' value='权限移除' onclick='removeManagements("+type.id+",\""+type.role_name+"\","+type.authority_level+")'></th></tr>";
+                $("table tbody").append(tr);
+            });
+        },"json");
+}
+function toPage(){
+    var currentPage = $("#toPage").val();
+    var  a = $("#toId").val();
+    if(currentPage>=a){
+        goPage(a);
+    }else{
+        goPage(currentPage);
+    }
+
+}
+    function timestampToTime(timestamp) {
+        var date = new Date(timestamp);
+        var Y = date.getFullYear() + '-';
+        var M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-';
+        var D = (date.getDate() < 10 ? '0' + date.getDate() : date.getDate()) + ' ';
+        var h = (date.getHours() < 10 ? '0' + date.getHours() : date.getHours()) + ':';
+        var m = (date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()) + ':';
+        var s = (date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds());
+        return Y + M + D + h + m + s;
+    }
+function addManagement(id,authority_level) {
+    var typeId = null;
+    var abc =[];
+    $(function () {
+        $.post("layui/test04",function (data) {
+       console.log(data);
+            $("#sss").html('');
+            $.each(data,function (index,type) {
+                var tr = "";
+                $.each(type.childManagementsList,function (index,obj) {
+                    tr = tr+"<input type='checkbox' value='"+obj.id+"'>"+obj.child_name+"  ";
+                });
+                var  str = "<br><div id='father_box'><input type='checkbox' value='"+type.id+"'>"+type.managements_name+"</div><br><div id='aaa"+type.id+"'>"+tr+"</div><hr>" ;
+                $("#sss").append(str);
+               abc.push(type.id);
+            });
+            console.log(abc);
+            var bbc = JSON.stringify(abc);
+            console.log(bbc);
+            $("#sss").append("<input name='role_name' type='text' placeholder='请输入角色名'><select id='level'><option value='2'>第二级别</option><option value='3'>第三级别</option><option value='4'>第四级别</option></select><input type='button' onclick='makeSure("+id+","+bbc+","+authority_level+")' value='确认添加'>");
+        },"json")
+    });
+
+}
+function makeSure(id,bbc,authority_level) {
+    var role_name = $("input[name='role_name']").val();
+    var level = $("#level").val();
+    if (role_name==''&&role_name==null){
+        alert("角色名不能为空！")
+        return;
+    }
+    console.log("id:"+id);
+    console.log("bbc:"+bbc)
+    var abc = bbc.join(',');
+    var tbc =  abc.split(',');
+    var chk_value = [];
+    var total = [];
+    var boolean = 'false';
+    $("#father_box :checked").each(function(){
+        chk_value.push($(this).val());
+    });
+
+  $.each(chk_value,function (index,num) {
+      if (num == 4){
+          boolean = 'true';
+      }
+    var zi = num+",";
+      $("#aaa"+num+" :checked").each(function () {
+       zi = zi + $(this).val()+",";
+    });
+      console.log(zi);
+      total.push(zi);
+    });
+    console.log(total);
+    console.log(boolean);
+var li = JSON.stringify(total);
+    $.post("layui/managementsList",{'list':li,'id':id,'role_name':role_name,'authority_level':authority_level,'boolean':boolean,'level':level},function (data) {
+        alert(data);
+        window.location.href="addAdmin.html";
+    },'json');
+
+}
+
+
+function removeManagements(id,role_name,authority_level) {
+    console.log(role_name);
+       if (role_name == '普通用户'){
+           alert("此人无任何权限，无需操作")
+         return;
+       }
+      $.post("layui/removeManagements",{'id':id,'authority_level':authority_level},function (data) {
+          alert(data);
+      },"json");
+}
+function checkManagements(id,role_name,username) {
+    console.log(id);
+    if (role_name == '普通用户'){
+        alert("此人无任何权限，无需操作")
+        return;
+    }
+    $("#sss").html('');
+    var str = "<legend>"+username+"的权限列表</legend>"+
+        "</fieldset>"+
+        "<div id='test13' class='demo-tree-more'></div>";
+    $("#sss").append(str)
+    layui.use(['tree', 'util'], function(){
+        var tree = layui.tree
+            ,layer = layui.layer
+            ,util = layui.util
+
+            //模拟数据1
+            ,data1 = new Array();     /*
+                             var map = {}; // Map map = new HashMap();
+                             map[key] = value; // map.put(key, value);
+                             var value = map[key]; // Object value = map.get(key);
+                             var has = key in map; // boolean has = map.containsKey(key);
+                             delete map[key]; // map.remove(key);
+                             */
+    $.post("layui/test01",{"id":id},function (data) {
+        console.log(data)
+/*            $.each(data,function (index,type) {
+                var father = {};
+                father["title"] = type.managements_name;
+                   var children = [];
+                    $.each(type.childManagementsList,function (index,obj) {
+                 var  child ={};
+                 child["title"] = obj.child_name;
+                 children.push(child);
+            });
+           father["children"] = children;
+
+data1.push(father);
+        });*/
+
+        tree.render({
+            elem: '#test13'
+            ,data: data
+            ,showLine: false  //是否开启连接线
+        });
+    },"json");
+/*        console.log(data2);
+        console.log(data1);
+        $.each(data1,function (index,type) {
+            console.log(type);
+        });*/
+
+
+
+
+    });
+}
+</script>    
+</body>
+</html>

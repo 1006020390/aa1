@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="sss">
+
+</div>
+<hr>
+<div>
+    <input type='text' name='management'>
+    <input type='button' value='添加权限节点' onclick='addmanagement()'>
+
+</div>
+
+<script src="layui/layui.js"></script>
+<script src="layui/jquery.min.js" type="text/javascript"></script>
+<script>
+    $(function () {
+        $.post("layui/test04", function (data) {
+            console.log(data);
+            $("#sss").html('');
+            $.each(data, function (index, type) {
+                if (type.childManagementsList == null){
+                    var str = "<br><div id='father_box'>" + type.managements_name + "</div><br><div>" +
+                        "</div><input type='button' onclick='addChild(" + type.id + ")' value='增加权限子节点'><div id='aaa" + type.id + "'></div><hr>";
+                    $("#sss").append(str);
+                } else {
+                    var tr = "";
+                    var num = 1;
+                    $.each(type.childManagementsList, function (index, obj) {
+                        tr = tr + (num++) + "." + obj.child_name + "  ";
+                    });
+                    var str = "<br><div id='father_box'>" + type.managements_name + "</div><br><div>" +
+                        tr + "</div><input type='button' onclick='addChild(" + type.id + ")' value='增加权限子节点'><div id='aaa" + type.id + "'></div><hr>";
+                    $("#sss").append(str);
+                }
+            });
+        },"json");
+    });
+function addChild(id) {
+    console.log(id);
+    $("#aaa"+id).html('');
+    var str = "<input type='text' name='child'>" +
+        "<input type='url' name='url'>"+
+        "<input type='button' value='确定添加' onclick='makeSure("+id+")'>";
+    $("#aaa"+id).append(str);
+}
+function makeSure(id) {
+    var aaa = $("input[name='child']").val();
+    var url = $("input[name='url']").val();
+    $.post("layui/test03",{"child":aaa,"id":id,"tree_url":url},function (data) {
+        alert(data);
+        window.location.href="managements.html";
+    });
+}
+function addmanagement() {
+    var management = $("input[name='management']").val();
+    $.post("layui/test03",{'management':management},function(data) {
+        alert(data);
+    },"json");
+
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/mvc
+       http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+    <!--处理静态资源-->
+    <mvc:default-servlet-handler></mvc:default-servlet-handler>
+
+    <mvc:resources mapping="/layui/css/**" location="/static/layui/css/"></mvc:resources>
+    <mvc:resources mapping="/layui/font/**" location="/static/layui/font/"></mvc:resources>
+   <!-- <mvc:resources mapping="/layui/images/**" location="/static/layui/images/"></mvc:resources>-->
+    <mvc:resources mapping="/layui/lay/**" location="/static/layui/lay/"></mvc:resources>
+    <mvc:resources mapping="/layui/**" location="/static/layui/"></mvc:resources>
+    <mvc:resources mapping="/images/**" location="/static/images/"></mvc:resources>
+
+
+
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/"></property>
+        <property name="suffix" value=".html"></property>
+    </bean>
+    <context:component-scan base-package="com.wangyi.controller"></context:component-scan>
+    <!--解决返回json数据乱码问题-->
+    <mvc:annotation-driven>
+        <mvc:message-converters>
+            <bean class="org.springframework.http.converter.StringHttpMessageConverter" >
+                <property name = "supportedMediaTypes">
+                    <list>
+                        <value>text/plain;charset=UTF-8</value>
+                        <value>text/html;charset=UTF-8</value>
+                        <value>application/json;charset=utf-8</value>
+                    </list>
+                </property>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+    <!--
+    支持文件上传的bean
+    id 必须等于 multipartResolver
+    -->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="maxUploadSize" value="1048000"></property> <!--1MB-->
+        <property name="defaultEncoding" value="utf-8"></property>
+    </bean>
+</beans>

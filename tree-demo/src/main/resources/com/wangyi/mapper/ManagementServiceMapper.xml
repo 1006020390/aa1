@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wangyi.mapper.ManagementServiceMapper">
+<select id="selectManagements" resultMap="use1">
+select m.id mId,managements_name,c.id cId,name,father_id from managements m left join childrenmanagements c on m.id = c.father_id
+</select>
+    <resultMap id="use1" type="com.wangyi.bean.Managements" autoMapping="true">
+        <id property="id" column="mId"></id>
+        <result property="managements_name" column="managements_name"></result>
+        <collection property="childManagementsList" ofType="com.wangyi.bean.ChildManagements" autoMapping="true">
+          <id property="id" column="cId"></id>
+            <result column="name" property="child_name"></result>
+            <result column="father_id" property="father_id"></result>
+        </collection>
+    </resultMap>
+<select id="selectUsers" resultMap="use2">
+    select id,username,create_time,role_name,authority_level from users
+</select>
+<resultMap id="use2" type="com.wangyi.bean.Users">
+    <id property="id" column="id"></id>
+    <result column="username" property="username"></result>
+    <result property="createTime" column="create_time"></result>
+    <result column="role_name" property="role_name"></result>
+    <result column="authority_level" property="authority_level"></result>
+</resultMap>
+    <select id="selectUsers02" resultMap="use02">
+    select id,username,password,role_name,authority_level from users
+</select>
+    <resultMap id="use02" type="com.wangyi.bean.Users">
+        <id property="id" column="id"></id>
+        <result column="username" property="username"></result>
+        <result property="password" column="password"></result>
+        <result property="role_name" column="role_name"></result>
+        <result property="authority_level" column="authority_level"></result>
+    </resultMap>
+
+<insert id="addManagements">
+    insert into user_authority (user_id,managements_id,childManagements_id) values
+    (#{user_id},#{managements_id},#{childManagements_id})
+</insert>
+<update id="addRoleName">
+    update users set role_name = #{role_name} where id = #{id}
+</update>
+ <select id="selectManagementsByName" resultMap="use3" statementType="PREPARED">
+select m.id mId,managements_name,c.id cId,name,father_id,tree_url from managements m,childrenmanagements c
+   where m.id = father_id and m.id in (${m_id}) and c.id in (${children});
+</select>
+    <resultMap id="use3" type="com.wangyi.bean.Managements" autoMapping="true">
+        <id property="id" column="mId"></id>
+        <result property="managements_name" column="managements_name"></result>
+        <collection property="childManagementsList" ofType="com.wangyi.bean.ChildManagements" autoMapping="true">
+            <id property="id" column="cId"></id>
+            <result column="name" property="child_name"></result>
+            <result column="father_id" property="father_id"></result>
+            <result column="tree_url" property="tree_url"></result>
+        </collection>
+    </resultMap>
+<select id="userAuthority" resultType="Integer">
+ select managements_id from user_authority where user_id = #{user_id};
+</select>
+<select id="userAuthorityChildren" resultType="Integer">
+ select childmanagements_id from user_authority where user_id = #{user_id};
+</select>
+<delete id="removeManagements">
+    delete from user_authority where user_id = #{user_id}
+</delete>
+<update id="restoreRoleName">
+    update users set role_name = '普通用户' where id = #{user_id}
+</update>
+<update id="updateAuthorityLevel">
+    update users set authority_level = #{level} where id=#{user_id}
+</update>
+  <!-- 添加权限节点的三个方法 -->
+<insert id="addManagement">
+    insert into managements (managements_name) values (#{management_name})
+</insert>
+<insert id="addChildManagement">
+    insert into childrenmanagements (name,father_id,tree_url) values (#{name},#{father_id},#{tree_url})
+</insert>
+<!-- 以上 -->
+</mapper>

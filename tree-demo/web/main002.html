@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>layout 后台大布局 - Layui</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet"  href="layui/css/layui.css"  media="all">
+    <style>
+      #test10 img{
+            width: 778px;
+            height: 440px;
+        }
+    </style>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header">
+        <div class="layui-logo">项目一： 装备系统权限管理</div>
+        <!-- 头部区域（可配合layui已有的水平导航） -->
+<!--        <ul class="layui-nav layui-layout-left">
+            <li class="layui-nav-item"><a href="">控制台</a></li>
+            <li class="layui-nav-item"><a href="">商品管理</a></li>
+            <li class="layui-nav-item"><a href="">用户</a></li>
+            <li class="layui-nav-item">
+                <a href="javascript:;">其它系统</a>
+                <dl class="layui-nav-child">
+                    <dd><a href="">邮件管理</a></dd>
+                    <dd><a href="">消息管理</a></dd>
+                    <dd><a href="">授权管理</a></dd>
+                </dl>
+            </li>
+        </ul>-->
+        <ul id="userMsg" class="layui-nav layui-layout-right">
+
+        </ul>
+    </div>
+
+    <div class="layui-side layui-bg-black">
+        <div class="layui-side-scroll">
+            <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+            <ul id="authorities" class="layui-nav layui-nav-tree"  lay-filter="test">
+
+
+            </ul>
+        </div>
+    </div>
+
+    <div class="layui-body">
+        <!-- 内容主体区域 -->
+        <div style="padding: 15px;" id="lununbo"></div>
+    </div>
+
+    <div class="layui-footer">
+        <!-- 底部固定区域 -->
+    半岛铁盒
+    </div>
+</div>
+<script src="layui/layui.js"></script>
+<script src="layui/jquery.min.js" type="text/javascript"></script>
+<script>
+    //JavaScript代码区域
+    layui.use('element', function(){
+        var element = layui.element;
+
+    });
+    $(function () {
+        $.post("layui/test",{"data":'110'},function (data) {
+            console.log(data);
+            var userMsg ="<li class='layui-nav-item'>"+
+                "<a href='javascript:;'>"+
+                "<img src='http://t.cn/RCzsdCq' class='layui-nav-img'>"+
+               data.user.username +"("+data.user.role_name+
+                ")</a><dl class='layui-nav-child'>"+
+                "<dd><a href=''>基本资料</a></dd>"+
+            "<dd><a href=''>安全设置</a></dd></dl></li>"+
+            "<li class='layui-nav-item'><a href=''>退了</a></li>";
+            $("#userMsg").html('');
+            $("#userMsg").append(userMsg);
+            $("#authorities").html('');
+            var sss = "<li class='layui-nav-item layui-nav-itemed'>"+
+                "<a class='' href='javascript:;'>所有权限</a>"+
+                "<dl class='layui-nav-child'>"+
+                "<dd><a id='bbb' onclick='lunBo()'>查看装备信息</a></dd>"+
+            "</dl>"+
+            "</li>";
+            $("#authorities").append(sss);
+        if (data.list == null){
+            return;
+        }
+$.each(data.list,function (index,type) {
+
+   console.log(type.childManagementsList);
+   var tr = "";
+    $.each(type.childManagementsList,function (index,obj) {
+          tr = tr+"<dd><a href='"+obj.tree_url+"'>"+obj.child_name+"</a></dd>";
+    });
+    var  str = "<li class='layui-nav-item'>" +
+        "<a  href='javascript:;'>"+type.managements_name+"</a><dl  class='layui-nav-child'>"+tr+"</dl></li>" ;
+    $("#authorities").append(str);
+
+});
+        },"json")
+    });
+function lunBo() {
+    var yoyo = "<div class='layui-carousel' id='test10'>"+
+        "<div carousel-item=''>"+
+        "<div><img src='images/ChMkJ1xRGj2IAeyLAAXT7EJyfAEAAupjQEzOXgABdQE230.jpg'></div>"+
+        "<div><img src='images/ChMkJ1xRGj2IE239AAtD-zuGHb8AAupjQEn9WUAC0QT764.jpg'></div>"+
+        "<div><img src='images/ChMkJ1xRGjqIR_6_AAQqL273vb0AAupjQDvZ60ABCpH832.jpg'></div>"+
+        "<div><img src='images/ChMkJ1xRGjuIcK1pAAWZJFUp3vYAAupjQEIqKIABZk8755.jpg'></div>"+
+        "<div><img src='images/ChMkJ1xRGjyIRrDPAAcfTbvaKp4AAupjQES8egABx9l969.jpg'></div>"+
+        "<div><img src='images/ChMkJ1xRGjyISHzVAAN1c086GZgAAupjQEfMawAA3WL705.jpg'></div>"+
+        "<div><img src='images/ChMkJlxRGjuIDiSKABBcDbY38l4AAupjQD3_Y0AEFwl739.jpg'></div>"+
+        "<div><img src='images/ChMkJlxRGjyITr_fAAPDum2ZY50AAupjQEal9oAA8PS957.jpg'></div>"+
+        "</div>"+
+        "</div>";
+    $("#lununbo").html('');
+    $("#lununbo").append(yoyo);
+    layui.use(['carousel', 'form'], function() {
+        var carousel = layui.carousel
+            , form = layui.form;
+        carousel.render({
+            elem: '#test10'
+            ,width: '778px'
+            ,height: '440px'
+            ,interval: 5000
+        });
+    });
+}
+
+
+
+
+</script>
+</body>
+</html>
